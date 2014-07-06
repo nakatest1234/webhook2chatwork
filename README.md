@@ -3,7 +3,7 @@ webhook2chatwork
 
 github webhook to chatwork
 
-1. php設
+1. php設定
   ```
   token: chatwork api用のトークン
   rid: チャット部屋のID(GETパラメータから設定可能)
