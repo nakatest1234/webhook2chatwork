@@ -6,6 +6,10 @@ ini_set('error_reporting', E_ALL );
 $config = array(
 	'rid'   => '',
 	'token' => '',
+	// github author name => chatwork account id
+	'users' => array(
+		'ambient2step' => '0',
+	),
 );
 
 return main($config);
@@ -60,14 +64,15 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 			$author_name = isset($v['author']['name']) ? $v['author']['name'] : 'no author';
 			$message     = isset($v['message'])        ? $v['message'] : '';
 			$url         = isset($v['url'])            ? $v['url']     : '';
-			$ymd         = isset($v['timestamp'])      ? date('Y-m-d H:i:s', strtotime($v['timestamp'])) : '-';
+			$time        = isset($v['timestamp']) ? strtotime($v['timestamp']) : 0;
+			$chatwork_account_id = isset($config['users'][$author_name]) ? $config['users'][$author_name] : 0;
 
-			$commits[] = sprintf("date: %s\nauthor: %s\nurl: %s\n%s", $ymd, $author_name, $url, $message);
+			$commits[] = sprintf("[qt][qtmeta aid=%s time=%s]%s\n%s[/qt]", $chatwork_account_id, $time, $url, $message);
 		}
 
 		if ( ! empty($commits))
 		{
-			$message = sprintf("[info][title]%s:%s[/title]compare: %s\n\n%s", $repository_name, $ref, $compare, implode("\n==============================\n", $commits));
+			$message = sprintf("[info][title]%s: %s[/title]%s\n%s[/info]", $repository_name, $ref, $compare, implode("\n", $commits));
 
 			$url = sprintf($api, $config['rid']);
 
