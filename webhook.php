@@ -6,9 +6,9 @@ ini_set('error_reporting', E_ALL );
 $config = array(
 	'rid'   => '',
 	'token' => '',
-	// github author name => chatwork account id
+	// github author email => chatwork account id
 	'users' => array(
-		'ambient2step' => '0',
+		'author@test.com' => '0',
 	),
 );
 
@@ -61,11 +61,11 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 
 		foreach ($json['commits'] as $v)
 		{
-			$author_name = isset($v['author']['name']) ? $v['author']['name'] : 'no author';
-			$message     = isset($v['message'])        ? $v['message'] : '';
-			$url         = isset($v['url'])            ? $v['url']     : '';
-			$time        = isset($v['timestamp']) ? strtotime($v['timestamp']) : 0;
-			$chatwork_account_id = isset($config['users'][$author_name]) ? $config['users'][$author_name] : 0;
+			$author_email = isset($v['author']['email']) ? $v['author']['email'] : 'no email';
+			$message      = isset($v['message'])         ? $v['message'] : '';
+			$url          = isset($v['url'])             ? $v['url']     : '';
+			$time         = isset($v['timestamp'])       ? strtotime($v['timestamp']) : 0;
+			$chatwork_account_id = isset($config['users'][$author_email]) ? $config['users'][$author_email] : 0;
 
 			$commits[] = sprintf("[qt][qtmeta aid=%s time=%s]%s\n%s[/qt]", $chatwork_account_id, $time, $url, $message);
 		}
