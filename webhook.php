@@ -58,8 +58,9 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 		$repository_name = isset($json['repository']['name']) ? $json['repository']['name'] : 'no name';
 
 		$commits = array();
+		$over_flg = count($json['commits'])>10 ? true : false;
 
-		foreach ($json['commits'] as $v)
+		foreach (array_splice($json['commits'], count($json['commits'])-10, 10) as $v)
 		{
 			$author_email = isset($v['author']['email']) ? $v['author']['email'] : 'no email';
 			$message      = isset($v['message'])         ? $v['message'] : '';
@@ -72,7 +73,7 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 
 		if ( ! empty($commits))
 		{
-			$message = sprintf("[info][title]%s: %s[/title]%s\n%s[/info]", $repository_name, $ref, $compare, implode("\n", $commits));
+			$message = sprintf("[info][title]%s: %s[/title]%s\n%s%s[/info]", $repository_name, $ref, $compare, $over_flg ? "over 10 commits\n" : '', implode("\n", $commits));
 
 			$url = sprintf($api, $config['rid']);
 
