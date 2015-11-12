@@ -10,6 +10,8 @@ $config = array(
 	'users' => array(
 		'author@test.com' => '0',
 	),
+	'ts'          => 4,
+	'commits_num' => 10,
 );
 
 return main($config);
@@ -20,7 +22,14 @@ function main($config=array())
 
 	try
 	{
-		isset($_GET['rid']) and $config['rid'] = $_GET['rid'];
+		isset($_GET['rid'])         and $config['rid'] = $_GET['rid'];
+		isset($_GET['ts'])          and $config['ts'] = $_GET['ts'];
+		isset($_GET['commits_num']) and $config['commits_num'] = $_GET['commits_num'];
+
+		if ( ! is_numeric($config['commits_num']) || $config['commits_num']<1)
+		{
+			$config['commits_num'] = 1;
+		}
 
 		if ( ! isset($config['token'])) throw new \Exception('no token');
 		if ( ! isset($config['rid']) || empty($config['rid'])) throw new \Exception('no rid');
@@ -58,13 +67,15 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 		$repository_name = isset($json['repository']['name']) ? $json['repository']['name'] : 'no name';
 
 		$commits = array();
-		$over_flg = count($json['commits'])>10 ? true : false;
 
-		foreach (array_splice($json['commits'], count($json['commits'])-10, 10) as $v)
+		$commits_num = $config['commits_num'];
+		$over_flg    = count($json['commits'])>$commits_num ? true : false;
+
+		foreach (array_splice($json['commits'], count($json['commits'])-$commits_num, $commits_num) as $v)
 		{
 			$author_email = isset($v['author']['email']) ? $v['author']['email'] : 'no email';
 			$message      = isset($v['message'])         ? $v['message']     : '';
-			$url          = isset($v['url'])             ? $v['url'].'?ts=4' : '';
+			$url          = isset($v['url'])             ? $v['url']."?ts={$config['ts']}" : '';
 			$time         = isset($v['timestamp'])       ? strtotime($v['timestamp']) : 0;
 			$chatwork_account_id = isset($config['users'][$author_email]) ? $config['users'][$author_email] : 0;
 
@@ -73,7 +84,7 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 
 		if ( ! empty($commits))
 		{
-			$message = sprintf("[info][title]%s: %s[/title]%s\n%s%s[/info]", $repository_name, $ref, $compare, $over_flg ? "over 10 commits\n" : '', implode("\n", $commits));
+			$message = sprintf("[info][title]%s: %s[/title]%s\n%s%s[/info]", $repository_name, $ref, $compare, $over_flg ? "over {$commits_num} commits\n" : '', implode("\n", $commits));
 
 			$url = sprintf($api, $config['rid']);
 
