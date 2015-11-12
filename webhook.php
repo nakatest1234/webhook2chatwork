@@ -63,8 +63,8 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 		foreach (array_splice($json['commits'], count($json['commits'])-10, 10) as $v)
 		{
 			$author_email = isset($v['author']['email']) ? $v['author']['email'] : 'no email';
-			$message      = isset($v['message'])         ? $v['message'] : '';
-			$url          = isset($v['url'])             ? $v['url']     : '';
+			$message      = isset($v['message'])         ? $v['message']     : '';
+			$url          = isset($v['url'])             ? $v['url'].'?ts=4' : '';
 			$time         = isset($v['timestamp'])       ? strtotime($v['timestamp']) : 0;
 			$chatwork_account_id = isset($config['users'][$author_email]) ? $config['users'][$author_email] : 0;
 
