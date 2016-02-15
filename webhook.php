@@ -11,6 +11,7 @@ $config = array(
 		'author@test.com' => '0',
 	),
 	'ts'          => 4,
+	'ws'          => false,
 	'commits_num' => 10,
 );
 
@@ -24,6 +25,7 @@ function main($config=array())
 	{
 		isset($_GET['rid'])         and $config['rid'] = $_GET['rid'];
 		isset($_GET['ts'])          and $config['ts'] = $_GET['ts'];
+		isset($_GET['ws'])          and $config['ws'] = $_GET['ws'];
 		isset($_GET['commits_num']) and $config['commits_num'] = $_GET['commits_num'];
 
 		if ( ! is_numeric($config['commits_num']) || $config['commits_num']<1)
@@ -73,11 +75,25 @@ function post_chatwork($config, $json, $api='https://api.chatwork.com/v1/rooms/%
 
 		foreach (array_splice($json['commits'], count($json['commits'])-$commits_num, $commits_num) as $v)
 		{
-			$author_email = isset($v['author']['email']) ? $v['author']['email'] : 'no email';
-			$message      = isset($v['message'])         ? $v['message']     : '';
-			$url          = isset($v['url'])             ? $v['url']."?ts={$config['ts']}" : '';
+			$author_email = isset($v['author']['email']) ? $v['author']['email']      : 'no email';
+			$message      = isset($v['message'])         ? $v['message']              : '';
+			$url          = isset($v['url'])             ? $v['url']                  : '';
 			$time         = isset($v['timestamp'])       ? strtotime($v['timestamp']) : 0;
 			$chatwork_account_id = isset($config['users'][$author_email]) ? $config['users'][$author_email] : 0;
+
+			$params = array();
+			if ($config['ts']>0)
+			{
+				$params['ts'] = $config['ts'];
+			}
+			if ($config['ws'])
+			{
+				$params['w'] = '';
+			}
+			if ( ! empty($params))
+			{
+				$url .= '?' . http_build_query($params);
+			}
 
 			$commits[] = sprintf("[qt][qtmeta aid=%s time=%s]%s\n%s[/qt]", $chatwork_account_id, $time, $url, $message);
 		}
